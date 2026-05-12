@@ -3,12 +3,12 @@ name: "Accenture Lab: Legacy to Modern CI"
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch: # Botón para ejecutarlo manualmente
+  workflow_dispatch:
 
 jobs:
   modernize-build:
-    runs-on: self-hosted # <--- La clave: Llama a tu Mac Mini
-    
+    runs-on: self-hosted
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -18,23 +18,30 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: 'maven' # Optimización de IA: Reutiliza librerías para ir más rápido
+          cache: 'maven'
 
       - name: Build & Package (Maven)
-        run: ./mvnw clean package -DskipTests
+        # Redirigimos la salida a un archivo para que la IA pueda leerlo después
+        run: ./mvnw clean package -DskipTests 2>&1 | tee build_output.log
 
       - name: Store Artifact
+        if: success() # Solo si el build sale bien
         uses: actions/upload-artifact@v4
         with:
           name: petclinic-binary
           path: target/*.jar
 
       - name: AI Diagnostic on Failure
-        if: failure() # Solo corre si algo truena
+        if: failure() 
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          # Aquí instalamos la librería rápido
-          pip install google-genai
-          # Ejecutamos el script pasando el log (puedes redirigir el output de pasos anteriores)
-          python diagnose_errors.py
+          # 1. Asegurar Python y Pip
+          sudo apt-get update && sudo apt-get install -y python3-pip
+          
+          # 2. Instalar librería (usando pip3 para evitar el 'not found')
+          pip3 install --upgrade google-genai 
+
+          # 3. Ejecutar diagnóstico sobre el log que creamos en el paso de Maven
+          # Asegúrate de que la ruta 'scripts/ai_diagnostics.py' sea correcta en tu repo
+          python3 scripts/ai_diagnostics.py build_output.log
