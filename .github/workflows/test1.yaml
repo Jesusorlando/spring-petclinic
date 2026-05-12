@@ -28,3 +28,13 @@ jobs:
         with:
           name: petclinic-binary
           path: target/*.jar
+
+      - name: AI Diagnostic on Failure
+        if: failure() # Solo corre si algo truena
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          # Aquí instalamos la librería rápido
+          pip install google-genai
+          # Ejecutamos el script pasando el log (puedes redirigir el output de pasos anteriores)
+          python diagnose_errors.py
