@@ -1,0 +1,30 @@
+name: "Accenture Lab: Legacy to Modern CI"
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: # Botón para ejecutarlo manualmente
+
+jobs:
+  modernize-build:
+    runs-on: self-hosted # <--- La clave: Llama a tu Mac Mini
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven' # Optimización de IA: Reutiliza librerías para ir más rápido
+
+      - name: Build & Package (Maven)
+        run: ./mvnw clean package -DskipTests
+
+      - name: Store Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: petclinic-binary
+          path: target/*.jar
