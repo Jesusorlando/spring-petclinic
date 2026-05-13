@@ -38,5 +38,5 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           # Aquí instalamos la librería rápido
-          python scripts/ai_diagnostics.py build.log 2>&1 | tee build.log
+          python3 scripts/ai_diagnostics.py build.log 2>&1 | tee build.log
 
