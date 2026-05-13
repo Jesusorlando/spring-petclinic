@@ -33,7 +33,7 @@ jobs:
         run: ls target/*.jar || exit 0
 
       - name: AI Diagnostic on Failure
-        if: failure() # Solo corre si algo truena
+        if: always() # Solo corre si algo truena
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
